@@ -16,3 +16,4 @@ void InsertSort(int n, int A[n]){
         M++;
     }
 }
+#а на море белый песок
