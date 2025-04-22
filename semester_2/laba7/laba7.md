@@ -270,4 +270,5 @@ int main(){
 
 Демонстрация работы:
 
-![alt text](image.png)
+![Снимок экрана 2025-04-22 144045](https://github.com/user-attachments/assets/0e5df96b-5f9c-477b-b3d0-d4c90bdc5009)
+
