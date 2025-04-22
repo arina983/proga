@@ -7,7 +7,7 @@
 1. Создание потока
 Реализация:
 
-pthread_t thread[4]; // Идентификаторы потоков
+```pthread_t thread[4]; // Идентификаторы потоков
 info thread_data[4]; // Данные потоков
 
 for (int i = 0; i < 4; i++) {
@@ -22,7 +22,7 @@ for (int i = 0; i < 4; i++) {
         return 1;
     }
 }
-
+```
 Создано 4 потока с помощью pthread_create();
 Каждый поток получает уникальные параметры через структуру thread_inf;
 Обработка ошибок создания потоков;
@@ -30,7 +30,7 @@ for (int i = 0; i < 4; i++) {
 2. Функция потока
 Реализация:
 
-void* thread_func(void* arg) {
+```void* thread_func(void* arg) {
     pthread_cleanup_push(thread_cleanup, arg);
     
     info data = *(info*)arg;
@@ -42,13 +42,14 @@ void* thread_func(void* arg) {
     pthread_cleanup_pop(0);
     return NULL;
 }
+```
 Функция очистки:
 
-void thread_cleanup(void *arg) {
+```void thread_cleanup(void *arg) {
     int thread_id = ((info*)arg)->thread_id;
     printf("Поток %d: завершение работы\n", thread_id);
 }
-
+```
 Использование pthread_cleanup_push/pop для регистрации функции очистки;
 Вывод последовательности сообщений с задержкой;
 Обработка параметров потока;
@@ -56,7 +57,7 @@ void thread_cleanup(void *arg) {
 3. Управление потоками
 Завершение потоков:
 
-sleep(2);
+```sleep(2);
 for (int i = 0; i < 4; i++) {
     pthread_cancel(thread[i]); // Принудительная отмена
 }
@@ -64,7 +65,7 @@ for (int i = 0; i < 4; i++) {
 for (int i = 0; i < 4; i++) {
     pthread_join(thread[i], NULL); // Ожидание завершения
 }
-
+```
 Потоки принудительно завершаются через 2 секунды;
 Использование pthread_join для ожидания завершения;
 Функция очистки вызывается при отмене потока;
@@ -72,16 +73,17 @@ for (int i = 0; i < 4; i++) {
 4. Sleepsort реализация
 Функция сортировки:
 
-void* sleep_sort(void* arg) {
+```void* sleep_sort(void* arg) {
     int value = *(int*)arg;
     usleep(value * 1000);
     printf("%d ", value);
     fflush(stdout);
     return NULL;
 }
+```
 Инициализация и запуск:
 
-void sleep_run() {
+```void sleep_run() {
     int arr[MAX_SIZE];
     int n;
     pthread_t threads[MAX_SIZE];
@@ -116,7 +118,7 @@ void sleep_run() {
     }
     printf("\n");
 }
-
+```
 Каждый элемент массива обрабатывается в отдельном потоке;
 Использование usleep для задержки, пропорциональной значению элемента;
 Проверка входных данных;
@@ -125,7 +127,7 @@ void sleep_run() {
 5. Главная функция
 Реализация:
 
-int main() {
+```int main() {
     // Создание и управление потоками (см. выше)
     
     // Вывод из основного потока
@@ -139,10 +141,10 @@ int main() {
 
     return 0;
 }
-
+```
 Готовый код:
 
-#include <stdio.h>
+```#include <stdio.h>
 #include <pthread.h>
 #include <unistd.h>
 #define MAX_SIZE 50
@@ -257,7 +259,7 @@ int main(){
 
     return 0;
 }
-
+```
 ---Выводы---
 Программа успешно демонстрирует:
 
