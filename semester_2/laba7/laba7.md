@@ -271,4 +271,90 @@ int main(){
 Демонстрация работы:
 
 ![Снимок экрана 2025-04-22 144045](https://github.com/user-attachments/assets/0e5df96b-5f9c-477b-b3d0-d4c90bdc5009)
+Далее было реализовано: 
+Синхронизированный вывод
+
+Модифицирована программа так, чтобы вывод родительского и дочернего потока был синхронизован: сначала родительский поток выводить первую строку, затем дочерний, затем родительский вторую строку и т.д. Использован mutex. 
+![image](https://github.com/user-attachments/assets/1f1cacd3-6535-42b4-a4e2-dc057650ccfa)
+
+Перемножение квадратных матриц NxN
+
+a.	Написана функцию произведения двух квадратных матриц A и B размером NxN (на выходе получим матрицу C). Исходные матрицы A и B заполнены единицами в основном потоке с функцией main.
+![image](https://github.com/user-attachments/assets/b8e2b6b4-4e82-413b-b990-197fe054760d)
+
+b.	С командной строки считыввется размер матрицы и количество потоков. Распараллеливается перемножение матриц разбая матрицу на равные части между потоками в главной функции по следующему принципу: N / threads
+![image](https://github.com/user-attachments/assets/8dc8c739-6c41-4570-af99-bac7dda5338d)
+
+Время выполнения
+
+Замерено время выполнения с момента создания потоков (до цикла с pthread_create) и до завершения работы потоков (после цикла pthread_join). Исходя из результатов построен график на Python
+```
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+from matplotlib.ticker import ScalarFormatter
+
+# Your data
+data = {
+    "Threads": [1, 1, 1, 1, 1, 8, 8, 8, 8, 8, 32, 32, 32, 32, 32, 64, 64, 64, 64, 64, 128, 128, 128, 128, 128],
+    "Matrix_Size": [100, 600, 1100, 1600, 2100, 100, 600, 1100, 1600, 2100, 100, 600, 1100, 1600, 2100, 100, 600, 1100, 1600, 2100, 100, 600, 1100, 1600, 2100],
+    "Time_ms": [11.256, 2572.287, 14430.957, 49242.526, 194598.707, 4.807, 483.789, 2825.489, 11600.448, 39271.788, 6.660, 468.196, 2342.818, 9865.757, 34885.378, 15.533, 471.779, 2863.454, 11652.397, 42385.869, 42.112, 689.024, 3869.364, 12315.637, 41202.034]
+}
+
+df = pd.DataFrame(data)
+
+# Setting the style
+plt.style.use('seaborn-v0_8-whitegrid')
+plt.rcParams['figure.figsize'] = [12, 7]
+plt.rcParams['font.size'] = 12
+
+# Creating the figure
+fig, ax = plt.subplots()
+
+# Unique thread counts and color map
+threads = sorted(df['Threads'].unique())
+colors = plt.cm.plasma(np.linspace(0.1, 0.9, len(threads)))
+
+# Plotting for each thread count
+for i, thread_count in enumerate(threads):
+    subset = df[df['Threads'] == thread_count].sort_values('Matrix_Size')
+    ax.plot(subset['Matrix_Size'], subset['Time_ms'], 
+            marker='o', 
+            linestyle='-', 
+            linewidth=2,
+            markersize=8,
+            color=colors[i],
+            label=f'{thread_count} потоков')
+
+# Axis settings
+ax.set_xscale('linear')
+ax.set_yscale('log')
+ax.set_xlim(50, 2200)
+ax.set_ylim(1, 3e5)
+
+# Formatting axes
+ax.xaxis.set_major_formatter(ScalarFormatter())
+ax.yaxis.set_major_formatter(ScalarFormatter())
+ax.set_yticks([10, 100, 1000, 10000, 100000])
+
+# Labels
+ax.set_xlabel('Размер матрицы', fontsize=12, labelpad=10)
+ax.set_ylabel('Время выполнения (мкс)', fontsize=12, labelpad=10)
+ax.set_title('Зависимость времени выполнения от размера матрицы и количества потоков', fontsize=14, pad=20)
+
+# Grid
+ax.grid(True, which='both', linestyle='--', alpha=0.5)
+
+# Legend
+legend = ax.legend(title='Количество потоков',
+                 bbox_to_anchor=(1.02, 1),
+                 loc='upper left',
+                 frameon=True,
+                 framealpha=0.9)
+
+plt.tight_layout()
+plt.show()
+```
+
+![image](https://github.com/user-attachments/assets/dd6be6f2-d247-4394-84fc-d8b402607b2d)
 
