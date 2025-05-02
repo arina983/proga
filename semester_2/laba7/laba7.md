@@ -358,3 +358,133 @@ plt.show()
 
 ![image](https://github.com/user-attachments/assets/dd6be6f2-d247-4394-84fc-d8b402607b2d)
 
+Код программы:
+```
+#include <stdio.h>
+#include <pthread.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <time.h>
+#include <string.h>
+
+#define MAX_THREADS 128
+#define MAX_MATRIX_SIZE 2500
+
+typedef struct {
+    int thread_id;
+    int N;
+    int thread_count;
+    int** A;
+    int** B;
+    int** C;
+} MatrixThreadData;
+
+int** allocate_matrix(int N) {
+    int** matrix = (int**)malloc(N * sizeof(int*));
+    for (int i = 0; i < N; i++) {
+        matrix[i] = (int*)malloc(N * sizeof(int));
+    }
+    return matrix;
+}
+
+void free_matrix(int** matrix, int N) {
+    for (int i = 0; i < N; i++) {
+        free(matrix[i]);
+    }
+    free(matrix);
+}
+
+void initialize_matrix(int N, int** matrix) {
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+            matrix[i][j] = rand() % 100;
+        }
+    }
+}
+
+void* matrix_multiply_thread(void* arg) {
+    MatrixThreadData* data = (MatrixThreadData*)arg;
+    int rows_per_thread = data->N / data->thread_count;
+    int start_row = data->thread_id * rows_per_thread;
+    int end_row = (data->thread_id == data->thread_count - 1) ? data->N : start_row + rows_per_thread;
+
+    for (int i = start_row; i < end_row; i++) {
+        for (int j = 0; j < data->N; j++) {
+            data->C[i][j] = 0;
+            for (int k = 0; k < data->N; k++) {
+                data->C[i][j] += data->A[i][k] * data->B[k][j];
+            }
+        }
+    }
+    return NULL;
+}
+
+void benchmark_matrix_multiplication(int N, int thread_count, FILE* output_file) {
+    int** A = allocate_matrix(N);
+    int** B = allocate_matrix(N);
+    int** C = allocate_matrix(N);
+    
+    initialize_matrix(N, A);
+    initialize_matrix(N, B);
+    
+    pthread_t threads[MAX_THREADS];
+    MatrixThreadData thread_data[MAX_THREADS];
+    
+    struct timespec start_time, end_time;
+    clock_gettime(CLOCK_MONOTONIC, &start_time);
+
+    for (int i = 0; i < thread_count; i++) {
+        thread_data[i].thread_id = i;
+        thread_data[i].N = N;
+        thread_data[i].thread_count = thread_count;
+        thread_data[i].A = A;
+        thread_data[i].B = B;
+        thread_data[i].C = C;
+        
+        pthread_create(&threads[i], NULL, matrix_multiply_thread, &thread_data[i]);
+    }
+
+    for (int i = 0; i < thread_count; i++) {
+        pthread_join(threads[i], NULL);
+    }
+
+    clock_gettime(CLOCK_MONOTONIC, &end_time);
+
+    double elapsed_time = (end_time.tv_sec - start_time.tv_sec) * 1000.0 + 
+                         (end_time.tv_nsec - start_time.tv_nsec) / 1000000.0;
+    
+    fprintf(output_file, "%d,%d,%.3f\n", N, thread_count, elapsed_time);
+    printf("N=%d, Threads=%d, Time=%.3f ms\n", N, thread_count, elapsed_time);
+    
+    free_matrix(A, N);
+    free_matrix(B, N);
+    free_matrix(C, N);
+}
+
+int main() {
+    srand(time(NULL));
+    
+    // Исправленный путь к файлу (Linux-style для WSL)
+    FILE* output_file = fopen("/home/arina/matrix_benchmark_results.csv", "w");
+    if (output_file == NULL) {
+        perror("Не удалось открыть файл для записи результатов");
+        return 1;
+    }
+    fprintf(output_file, "MatrixSize,ThreadCount,TimeMs\n");
+    
+    // Тестируем различные размеры матриц и количество потоков
+    int matrix_sizes[] = {100, 250, 500, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500};
+    int thread_counts[] = {1, 2, 4, 8, 16, 32, 64, 128};
+    
+    for (int i = 0; i < sizeof(matrix_sizes)/sizeof(matrix_sizes[0]); i++) {
+        for (int j = 0; j < sizeof(thread_counts)/sizeof(thread_counts[0]); j++) {
+            benchmark_matrix_multiplication(matrix_sizes[i], thread_counts[j], output_file);
+        }
+    }
+    
+    fclose(output_file);
+    printf("Тестирование завершено. Результаты сохранены в /home/arina/matrix_benchmark_results.csv\n");
+    
+    return 0;
+}
+```
