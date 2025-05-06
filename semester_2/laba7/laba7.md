@@ -7,7 +7,8 @@
 1. Создание потока
 Реализация:
 
-```pthread_t thread[4]; // Идентификаторы потоков
+```c
+pthread_t thread[4]; // Идентификаторы потоков
 info thread_data[4]; // Данные потоков
 
 for (int i = 0; i < 4; i++) {
@@ -30,7 +31,8 @@ for (int i = 0; i < 4; i++) {
 2. Функция потока
 Реализация:
 
-```void* thread_func(void* arg) {
+```c
+void* thread_func(void* arg) {
     pthread_cleanup_push(thread_cleanup, arg);
     
     info data = *(info*)arg;
@@ -45,7 +47,8 @@ for (int i = 0; i < 4; i++) {
 ```
 Функция очистки:
 
-```void thread_cleanup(void *arg) {
+```c
+void thread_cleanup(void *arg) {
     int thread_id = ((info*)arg)->thread_id;
     printf("Поток %d: завершение работы\n", thread_id);
 }
@@ -57,7 +60,8 @@ for (int i = 0; i < 4; i++) {
 3. Управление потоками
 Завершение потоков:
 
-```sleep(2);
+```c
+sleep(2);
 for (int i = 0; i < 4; i++) {
     pthread_cancel(thread[i]); // Принудительная отмена
 }
@@ -83,7 +87,8 @@ for (int i = 0; i < 4; i++) {
 ```
 Инициализация и запуск:
 
-```void sleep_run() {
+```c
+void sleep_run() {
     int arr[MAX_SIZE];
     int n;
     pthread_t threads[MAX_SIZE];
@@ -127,7 +132,8 @@ for (int i = 0; i < 4; i++) {
 5. Главная функция
 Реализация:
 
-```int main() {
+```c
+int main() {
     // Создание и управление потоками (см. выше)
     
     // Вывод из основного потока
@@ -144,7 +150,8 @@ for (int i = 0; i < 4; i++) {
 ```
 Готовый код:
 
-```#include <stdio.h>
+```c
+#include <stdio.h>
 #include <pthread.h>
 #include <unistd.h>
 #define MAX_SIZE 50
@@ -291,7 +298,7 @@ b.	С командной строки считыввется размер мат
 Время выполнения
 
 Замерено время выполнения с момента создания потоков (до цикла с pthread_create) и до завершения работы потоков (после цикла pthread_join). Исходя из результатов построен график на Python
-```
+```python 
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -359,10 +366,11 @@ plt.tight_layout()
 plt.show()
 ```
 
-![image](https://github.com/user-attachments/assets/dd6be6f2-d247-4394-84fc-d8b402607b2d)
+![image](https://github.com/user-attachments/assets/8ae70849-3a14-4e21-95b7-26ce2c602368)
+
 
 Код программы:
-```
+```c
 #include <stdio.h>
 #include <pthread.h>
 #include <stdlib.h>
